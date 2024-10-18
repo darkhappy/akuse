@@ -27,9 +27,7 @@ interface TopControlsProps {
   showNextEpisodeButton: boolean;
   fullscreen: boolean;
   subtitleTracks?: ISubtitle[];
-  onSubtitleTrack: (
-    track: ISubtitle
-  ) => void;
+  onSubtitleTrack: (track: ISubtitle) => void;
   onFullScreentoggle: () => void;
   onPiPToggle: () => void;
   onChangeEpisode: (
@@ -40,6 +38,7 @@ interface TopControlsProps {
   onClick?: (event: any) => void;
   onDblClick?: (event: any) => void;
   onDropdownToggle: (isDropdownOpen: boolean) => void;
+  onRemotePlaybackChange: () => void;
 }
 
 const TopControls: React.FC<TopControlsProps> = ({
@@ -60,12 +59,14 @@ const TopControls: React.FC<TopControlsProps> = ({
   onDblClick,
   onDropdownToggle,
   subtitleTracks,
-  onSubtitleTrack
+  onSubtitleTrack,
+  onRemotePlaybackChange,
 }) => {
   const settingsRef = useRef<HTMLDivElement>(null);
 
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showEpisodesChange, setShowEpisodesChange] = useState<boolean>(false);
+  const [showRemotePlayback, setShowRemotePlayback] = useState<boolean>(false);
 
   useEffect(() => {
     onDropdownToggle(showSettings || showEpisodesChange);
@@ -74,8 +75,21 @@ const TopControls: React.FC<TopControlsProps> = ({
   const closeOthers = () => {
     setShowSettings(false);
     setShowEpisodesChange(false);
+    setShowRemotePlayback(false);
     if (videoRef.current) videoRef.current.focus();
   };
+
+  const onRemotePlayback = (remotePlayback: boolean) => {
+    setShowRemotePlayback(remotePlayback);
+  };
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.remote
+        .watchAvailability(onRemotePlayback)
+        .catch(() => setShowRemotePlayback(false));
+    }
+  }, [videoRef.current]);
 
   return (
     <div className="up-controls" onClick={onClick} onDoubleClick={onDblClick}>
@@ -124,6 +138,17 @@ const TopControls: React.FC<TopControlsProps> = ({
             <span className="tooltip-text">Picture-in-Picture</span>
           </div>
         </button>
+        {showRemotePlayback && (
+          <button
+            className="b-player"
+            onClick={onRemotePlaybackChange}
+          >
+            <div className="tooltip">
+              <FontAwesomeIcon className="i" icon={faUpRightFromSquare} />
+              <span className="tooltip-text">Picture-in-Picture</span>
+            </div>
+          </button>
+        )}
         <button className="b-player fullscreen" onClick={onFullScreentoggle}>
           <div className="tooltip">
             <FontAwesomeIcon

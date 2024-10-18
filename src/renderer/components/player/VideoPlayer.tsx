@@ -814,6 +814,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
       video.currentTime = currentEvent.interval.endTime;
   }
 
+  const handleRemotePlaybackChange = () => {
+    if (videoRef.current) {
+      videoRef.current.remote.prompt();
+    }
+  }
+
   return ReactDOM.createPortal(
     show && (
       <>
@@ -874,6 +880,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
               onClick={togglePlayingWithoutPropagation}
               onDblClick={toggleFullScreenWithoutPropagation}
               onDropdownToggle={handleDropdownToggle}
+              onRemotePlaybackChange={handleRemotePlaybackChange}
             />
             <MidControls
               videoRef={videoRef}
